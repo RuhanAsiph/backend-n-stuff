@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-
+const bcrypt = require('bcryptjs');
 // create schema
 const userSchema = new mongoose.Schema({
 	name: {
@@ -30,6 +30,15 @@ const userSchema = new mongoose.Schema({
 		}
 	}
 });
+
+userSchema.pre('save', async function(next){
+	//run if the passkey is modified 
+	if(!this.isModified('password')) return next();
+	 //hash password using bcrypt, will protect against bruteforce attacks
+	 this.password = await bcrypt.hash(this.password, 12)
+	 this.passwordConfirm = undefined;
+	 next();
+})
 
 const User = mongoose.model('User', userSchema);
 
