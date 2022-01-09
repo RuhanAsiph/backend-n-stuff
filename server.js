@@ -10,8 +10,6 @@ dotenv.config({path: './config.env'})
 
 app.set("view engine", "ejs");
 
-
-
 app.use(express.urlencoded({extended: true}));
 app.use(express.json()) // To parse the incoming requests with JSON payloads
 
@@ -115,7 +113,10 @@ const getAppointment = async (req, res) => {
 //test user routing
 const userRouter = express.Router();
 userRouter.route('/signup').post(authController.signup);
+userRouter.route('/login').post(authController.login);
 app.use('/api/v1/users', userRouter);
+//login router
+
 
 //implement product router 
 const productRouter = express.Router();
