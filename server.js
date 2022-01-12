@@ -64,9 +64,6 @@ app.get('/appointments', (req,res) => {
 app.get('/schedule', (req,res) => {
     res.sendFile(__dirname + "/frontend/schedule.html");
 });
-app.get('/chatbot', (req,res) => {
-    res.sendFile(__dirname + "/frontend/chatbot.html");
-});
 
 //api
 //handler func
@@ -89,6 +86,25 @@ const createAppointment = async (req, res) => {
         })
     }
 };
+
+//api for fetching tours
+const getAppointments = async (req, res) => {
+    try {
+        const products = await Product.find()
+        res.status(200).json({
+            status: "success",
+            data: {
+                products
+            }
+        });
+    } catch (err) {
+        res.status(400).json({
+            status: "fail",
+            message: "invalid data sent"
+        })
+    }
+};
+
 const getAppointment = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
@@ -121,12 +137,15 @@ app.use('/api/v1/users', userRouter);
 //implement product router 
 const productRouter = express.Router();
 productRouter.route('/').post(createAppointment);
+
+//not using this route in the final project yet 
+productRouter.route('/').get(authController.protect, getAppointments);
 productRouter.route('/:id').get(getAppointment);
+
 app.use('/api/v1/appointments', productRouter);
 
 
 //start
-const region = process.env.REGION || "Unknown";
 const port = 4000
 app.listen(port, function(){
     console.log(`Server started at ${port}`);
