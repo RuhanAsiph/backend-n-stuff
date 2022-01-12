@@ -29,7 +29,8 @@ const userSchema = new mongoose.Schema({
 				return el === this.password;
 			}
 		}
-	}
+	},
+	passwordChangedAt: Date  
 });
 
 userSchema.pre('save', async function(next){
@@ -46,6 +47,19 @@ userSchema.methods.correctPassword = async function(candidatePassword, userPassw
 	return await bcrypt.compare(candidatePassword, userPassword);
 
 }
+
+userSchema.methods.changedPasswordAfter = function(JWTTimestamp){
+	//.this always points to the current document
+	//if passkey changed at proptery exists only then we want to do the camparison
+	if(this.passwordChangedAt) {
+		const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+		return JWTTimestamp < changedTimestamp
+	}
+
+	//if user has not changed the passkey
+	return false;
+
+};
 
 const User = mongoose.model('User', userSchema);
 
