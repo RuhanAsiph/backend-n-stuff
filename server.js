@@ -122,6 +122,25 @@ const getAppointment = async (req, res) => {
     }
 };
 
+const catchAsync = fn => {
+	return (req, res, next) => {
+		fn(req, res, next).catch(next);
+	}
+}
+
+const deleteAppointment = catchAsync(async (req, res, next) => {
+    const product = await Product.findByIdAndDelete(req.params.id);
+  
+    if (!product) {
+      return next(new AppError('No appointment found with that ID', 404));
+    }
+  
+    res.status(204).json({
+      status: 'success',
+      data: null
+    });
+  });
+
 //app.post 
 //app.post('/api/v1/appointments', createAppointment);
 
@@ -140,7 +159,7 @@ productRouter.route('/').post(createAppointment);
 
 //not using this route in the final project yet 
 productRouter.route('/').get(authController.protect, getAppointments);
-productRouter.route('/:id').get(getAppointment);
+productRouter.route('/:id').get(getAppointment).delete(authController.protect, authController.restrictTo('admin'), deleteAppointment);
 
 app.use('/api/v1/appointments', productRouter);
 
